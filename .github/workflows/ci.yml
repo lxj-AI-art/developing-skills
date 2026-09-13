@@ -1,0 +1,27 @@
+name: developing-skills-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  deterministic-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile scripts
+        run: python -m compileall -q scripts
+      - name: Validate Skill
+        run: python scripts/validate_candidate.py .
+      - name: Run deterministic self-tests
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python scripts/self_test.py

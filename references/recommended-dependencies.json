@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "dependencies": [
+    {
+      "id": "anthropic-skill-creator",
+      "recommended": true,
+      "default_selected": true,
+      "source": {
+        "repo": "anthropics/skills",
+        "path": "skills/skill-creator",
+        "ref": "34040c9c568585f6929bedeaad110ad08f079624"
+      },
+      "expected_content_id": "412558e2d4103a965f8bd319273797a4787f1d4635c2b16f1df0d77d7e0680f4",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE.txt",
+      "required_capabilities": [
+        "validate",
+        "package",
+        "description_optimize",
+        "viewer"
+      ],
+      "install": {
+        "mode": "private-provider",
+        "relative_root": "dependencies/anthropic-skill-creator"
+      }
+    }
+  ]
+}

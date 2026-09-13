@@ -1,0 +1,13 @@
+interface:
+  display_name: Skill 开发与自动优化
+  short_description: 构建专业 Skill，并用标注案例自动评测、归因和优化
+  default_prompt: 请使用 $developing-skills，根据我的目标和标注案例开发或改进一个 Skill，并自动评测候选版本。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
