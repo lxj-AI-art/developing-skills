@@ -205,7 +205,7 @@ def test_dependency_update_audit(root: Path) -> None:
         "--current-root", str(source), "--compatibility-command", f"{sys.executable} -c pass", "--output", str(report),
     ], capture_output=True, text=True, check=False)
     assert completed.returncode == 0, completed.stderr + completed.stdout
-    value = json.loads(report.read_text())
+    value = json.loads(report.read_text(encoding="utf-8"))
     assert value["status"] == "pass" and value["installs_or_updates_dependency"] is False and value["sbom"]
 
 
@@ -355,7 +355,7 @@ json.dump(value,open(sys.argv[2],"w",encoding="utf-8"),ensure_ascii=False)
 ''')
     output = case_root / "review.json"
     completed = subprocess.run([sys.executable, str(HERE / "review_design.py"), "design", "--design", str(design_path), "--adapter-command", f"{sys.executable} {adapter}", "--reviewer-id", "reviewer", "--modifier-id", "author", "--output", str(output)], capture_output=True, text=True, check=False)
-    assert completed.returncode == 0 and json.loads(output.read_text())["status"] == "pass", completed.stderr
+    assert completed.returncode == 0 and json.loads(output.read_text(encoding="utf-8"))["status"] == "pass", completed.stderr
     completed = subprocess.run([sys.executable, str(HERE / "review_design.py"), "design", "--design", str(design_path), "--adapter-command", f"{sys.executable} {adapter}", "--reviewer-id", "same", "--modifier-id", "same", "--output", str(case_root / "bad.json")], capture_output=True, text=True, check=False)
     assert completed.returncode != 0 and not (case_root / "bad.json").exists()
 
@@ -414,11 +414,11 @@ def test_dataset_holdout_and_professional_governance(root: Path) -> None:
     vault = case_root / "vault"
     visible = case_root / "visible.json"
     created = create_vault(eval_path, vault, visible, 1)
-    assert created["status"] == "sealed" and len(json.loads(visible.read_text())["cases"]) == 1
+    assert created["status"] == "sealed" and len(json.loads(visible.read_text(encoding="utf-8"))["cases"]) == 1
     token = vault / "token.txt"
     released = checkout_holdout(vault, token, "final_selection", "candidate-1", case_root / "checkout", visible)
     assert released["status"] == "released"
-    assembled = json.loads(Path(released["eval_set"]).read_text())
+    assembled = json.loads(Path(released["eval_set"]).read_text(encoding="utf-8"))
     assert {case["split"] for case in assembled["cases"]} == {"train", "holdout"}
     state = holdout_status(vault, token)
     assert state["ledger_valid"] and state["remaining_final_accesses"] == 0
@@ -470,7 +470,7 @@ json.dump(value,open(sys.argv[2],"w",encoding="utf-8"))
     output = case_root / "report.json"
     completed = subprocess.run([sys.executable, str(HERE / "calibrate_grader.py"), str(calibration_path), "--adapter-command", f"{sys.executable} {adapter}", "--adapter-command", f"{sys.executable} {adapter}", "--output", str(output)], capture_output=True, text=True, check=False)
     assert completed.returncode == 0, completed.stderr + completed.stdout
-    report = json.loads(output.read_text())
+    report = json.loads(output.read_text(encoding="utf-8"))
     assert report["status"] == "pass" and report["metrics"]["critical_false_negative_rate"] == 0.0 and report["inter_grader"]["graders"] == 2
 
 
@@ -527,7 +527,7 @@ json.dump(value,open(out,"w",encoding="utf-8"),ensure_ascii=False)
         "--assurance-reviewer-id", "reviewer", "--modifier-id", "modifier", "--workspace", str(workspace), "--adapter-command", f"{sys.executable} {adapter}", "--workers", "1",
     ], capture_output=True, text=True, check=False)
     assert completed.returncode == 0, completed.stderr + completed.stdout
-    history = json.loads((workspace / "history.json").read_text())
+    history = json.loads((workspace / "history.json").read_text(encoding="utf-8"))
     assert history["status"] == "candidate_is_best"
     latest = Path(history["recommended_candidate_path"])
     assert history["current_assurance"]["candidate_id"] == tree_hash(latest)
@@ -552,20 +552,20 @@ def test_retry_classification(root: Path) -> None:
     case_root = root / "retry"; case_root.mkdir()
     adapter_path = case_root / "adapter.py"
     write(adapter_path, f'''import json,pathlib,sys
-job=json.load(open(sys.argv[1],encoding="utf-8")); counter=pathlib.Path({str(case_root)!r})/(job["job_type"]+".count"); count=int(counter.read_text()) if counter.exists() else 0; counter.write_text(str(count+1))
+job=json.load(open(sys.argv[1],encoding="utf-8")); counter=pathlib.Path({str(case_root)!r})/(job["job_type"]+".count"); count=int(counter.read_text(encoding="utf-8")) if counter.exists() else 0; counter.write_text(str(count+1),encoding="utf-8")
 if count==0: sys.exit(75)
 json.dump({{"job_id":job["job_id"],"status":"pass"}},open(sys.argv[2],"w",encoding="utf-8"))
 ''')
     adapter = Adapter([sys.executable, str(adapter_path)], 10, case_root / "jobs", max_retries=2)
     response = adapter.call({"job_id": "grade:retry", "job_type": "grade"}, Path("grade"))
-    assert response["status"] == "pass" and (case_root / "grade.count").read_text() == "2"
+    assert response["status"] == "pass" and (case_root / "grade.count").read_text(encoding="utf-8") == "2"
     try:
         adapter.call({"job_id": "modify:no-retry", "job_type": "modify"}, Path("modify"))
     except AdapterCallError as exc:
         assert exc.failure_class == "transient-exit-75" and not exc.retryable
     else:
         raise AssertionError("modify was retried despite mutation risk")
-    assert (case_root / "modify.count").read_text() == "1"
+    assert (case_root / "modify.count").read_text(encoding="utf-8") == "1"
 
 
 def main() -> int:
