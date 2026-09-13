@@ -174,7 +174,7 @@ print("installed fixture")
     assert (skill_root / "dependencies" / "anthropic-skill-creator" / "installation.json").is_file()
     assert bound_dependency_root(skill_root) == Path(result["private_root"])
     moved_root = root / "moved-developing-skills"; shutil.copytree(skill_root, moved_root)
-    assert bound_dependency_root(moved_root) == moved_root / "dependencies" / "anthropic-skill-creator" / ref
+    assert bound_dependency_root(moved_root) == (moved_root / "dependencies" / "anthropic-skill-creator" / ref).resolve()
     repeated = subprocess.run([*common, "install"], capture_output=True, text=True, check=False)
     assert repeated.returncode == 0 and json.loads(repeated.stdout)["status"] == "already_installed"
     (Path(result["private_root"]) / "SKILL.md").write_text("tampered", encoding="utf-8")

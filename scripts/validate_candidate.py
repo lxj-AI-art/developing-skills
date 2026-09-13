@@ -152,6 +152,10 @@ def validate_candidate(skill: Path, checks: list[dict[str, Any]] | None = None) 
 
 
 def main() -> int:
+    # Windows runners and some interactive shells default to a legacy code page.
+    # Keep the human-readable JSON contract instead of escaping non-ASCII text.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("skill", type=Path)
     parser.add_argument("--checks", type=Path, help="JSON array or object with candidate_checks")
