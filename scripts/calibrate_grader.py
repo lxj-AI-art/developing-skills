@@ -5,12 +5,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import shlex
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
+from command_line import split_command
 from run_optimization import Adapter, validate_grading_core
 
 
@@ -152,7 +152,7 @@ def main() -> int:
         with tempfile.TemporaryDirectory(prefix="developing-skills-calibration-") as temporary:
             reports = []
             for index, raw_command in enumerate(args.adapter_command, 1):
-                command = shlex.split(raw_command)
+                command = split_command(raw_command)
                 if not command:
                     raise ValueError("adapter command must not be empty")
                 reports.append(calibrate(data, Adapter(command, args.timeout, Path(temporary) / f"grader-{index}")))

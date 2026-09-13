@@ -8,13 +8,13 @@ import ast
 import json
 import os
 import re
-import shlex
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 from anthropic_skill_creator import inspect_root, tree_digest
+from command_line import split_command
 
 
 SUSPICIOUS = {
@@ -116,7 +116,7 @@ def main() -> int:
         report = audit(load(args.manifest), args.candidate_root.resolve(), args.candidate_ref, args.current_root.resolve() if args.current_root else None)
         compatibility_runs = []
         for raw in args.compatibility_command:
-            command = shlex.split(raw)
+            command = split_command(raw)
             if not command:
                 raise ValueError("compatibility command must not be empty")
             completed = subprocess.run(command, cwd=args.candidate_root.resolve(), capture_output=True, text=True, timeout=args.timeout, check=False)

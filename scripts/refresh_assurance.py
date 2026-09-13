@@ -5,13 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import shlex
 import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Any
 
+from command_line import split_command
 from design_gate import bind, file_hash, tree_hash, validate_approval, validate_conformance, validate_design
 from review_design import DIMENSIONS, validate_response
 from validate_traceability import load, validate_traceability
@@ -208,7 +208,7 @@ def main() -> int:
     parser.add_argument("--changed-file", action="append", default=[])
     parser.add_argument("--timeout", type=int, default=600)
     args = parser.parse_args()
-    command = shlex.split(args.adapter_command)
+    command = split_command(args.adapter_command)
     if not command:
         parser.error("adapter command must not be empty")
     try:

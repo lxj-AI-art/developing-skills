@@ -7,7 +7,6 @@ import argparse
 import hashlib
 import json
 import secrets
-import shlex
 import shutil
 import subprocess
 import sys
@@ -20,6 +19,7 @@ from typing import Any
 from aggregate_benchmark import aggregate, load_runs, markdown
 from analyze_benchmark import analyze
 from audit_eval_set import audit as audit_eval_set
+from command_line import split_command
 from design_gate import ensure_binding_match, file_hash as assurance_file_hash
 from design_gate import bind, freeze_approved_design, validate_approval, validate_conformance, validate_design
 from generate_eval_report import render
@@ -917,7 +917,7 @@ def main() -> int:
         parser.error("workspace must be new or empty; optimization never overwrites prior evidence")
     if args.workers < 1 or args.timeout < 1 or args.adapter_retries < 0:
         parser.error("--workers and --timeout must be >= 1 and --adapter-retries must be >= 0")
-    command = shlex.split(args.adapter_command)
+    command = split_command(args.adapter_command)
     if not command:
         parser.error("--adapter-command must not be empty")
 

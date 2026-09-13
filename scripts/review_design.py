@@ -5,13 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import shlex
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
+from command_line import split_command
 from design_gate import file_hash, tree_hash, validate_approval, validate_design
 
 
@@ -93,7 +93,7 @@ def main() -> int:
                 "eval_set_path": str(args.eval_set.resolve()), "eval_set_id": file_hash(args.eval_set.resolve()),
                 "approval_id": approval["approval_id"], "traceability_validation_path": str(args.traceability_validation.resolve()),
             })
-        command = shlex.split(args.adapter_command)
+        command = split_command(args.adapter_command)
         if not command:
             raise ValueError("adapter command is empty")
         response = invoke(command, job, args.timeout)
